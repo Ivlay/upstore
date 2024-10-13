@@ -26,16 +26,16 @@
   COPY . /workspace/
   
   RUN \
-      cd _example/simple && \
+      cd cmd/upstore && \
       go mod init github.com/mattn/sample && \
       go mod edit -replace=github.com/mattn/go-sqlite3=../.. && \
       go mod tidy && \
-      go install -ldflags='-s -w -extldflags "-static"' ./cmd/upstore/main.go
+      go install -ldflags='-s -w -extldflags "-static"' ./main.go
   
   RUN \
       # Smoke test
       set -o pipefail; \
-      /go/bin/simple | grep 99\ こんにちは世界099
+      /go/bin/upstore | grep 99\ こんにちは世界099
   
   # -----------------------------------------------------------------------------
   #  Main Stage
