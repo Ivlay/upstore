@@ -23,6 +23,9 @@ func (b *bot) CheckPrice() {
 		}
 
 		p, err := b.service.Product.Get()
+		if err != nil {
+			b.logger.Error("error while get product", zap.Error(err))
+		}
 
 		if uu != nil {
 			defaultGreeting := "Привет! Цена на товар изменилась:\n"
