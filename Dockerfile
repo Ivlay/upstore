@@ -1,25 +1,24 @@
-FROM golang:1.23.1 AS builder
+FROM golang:1.23.1-alpine AS builder
 
-WORKDIR /app
+WORKDIR /usr/local/src
 
-RUN apt-get update && \
-apt-get -y install gcc && \
-rm -rf /var/lib/apt/lists/*
+RUN apk --update upgrade && \
+    apk add sqlite && \
+    apk add --no-cache gcc musl-dev \
+    rm -rf /var/cache/apk/*
+# See http://stackoverflow.com/questions/34729748/installed-go-binary-not-found-in-path-on-alpine-linux-docker
+RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
 
 COPY go.mod go.sum ./
 
 RUN go mod download
 
-COPY *.go ./
+COPY . ./
 
-ENV CGO_ENABLED=1
+RUN CGO_ENABLED=1 go build -o ./bin/app cmd/upstore/main.go
 
-RUN CGO_ENABLED=1 GOOS=linux go build -o /.bin/app
+FROM alpine AS runner
 
-FROM scratch
+COPY --from=builder /usr/local/src/bin/app /
 
-WORKDIR /
-
-COPY --from=builder /.bin/app /.bin/app
-
-CMD ["/.bin/app"]
+CMD ["/app"]
