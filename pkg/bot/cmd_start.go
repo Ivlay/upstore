@@ -28,9 +28,14 @@ func (b *bot) CmdStart(upd tgbotapi.Update) {
 		log.Fatal(err.Error())
 	}
 
-	message := `Добро пожаловать в <b>UpStore price check</b>, %s!`
+	message := `Добро пожаловать в <b>UpStore price check</b>, %s! </br> Текущая цена: <b>%d ₽</b>`
 
-	reply := tgbotapi.NewMessage(upd.Message.Chat.ID, fmt.Sprintf(message, name))
+	p, pErr := b.service.Product.Get()
+	if pErr != nil {
+		b.logger.Error("Filed to get user Product", zap.Error(err))
+	}
+
+	reply := tgbotapi.NewMessage(upd.Message.Chat.ID, fmt.Sprintf(message, name, p.Price))
 	reply.ParseMode = "html"
 
 	// keyboard := tgbotapi.NewReplyKeyboard(
